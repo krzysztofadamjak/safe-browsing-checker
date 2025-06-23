@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sprawdź, czy to fraud (Google Safe Browsing API)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      text-align: center;
+      padding: 30px;
+      max-width: 700px;
+      margin: auto;
+    }
+    input, button, textarea {
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      width: 300px;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .result {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+    .safe {
+      color: green;
+    }
+    .fraud {
+      color: red;
+    }
+    #reportSection, #historySection, #chartSection {
+      background: white;
+      margin-top: 40px;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      color: #d9534f;
+    }
+    #historyList {
+      max-height: 150px;
+      overflow-y: auto;
+      text-align: left;
+      margin: 10px auto;
+      padding: 0 20px;
+    }
+    #historyList li {
+      cursor: pointer;
+      padding: 4px 0;
+      border-bottom: 1px solid #eee;
+    }
+    #historyList li:hover {
+      background-color: #f8d7da;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔍 Sprawdź, czy strona to fraud (Google Safe Browsing API)</h1>
+
+  <input list="urlHistory" type="text" id="urlInput" placeholder="Wpisz adres URL (np. http://example.com)" autocomplete="off" />
+  <datalist id="urlHistory"></datalist>
+  <br />
+  <button onclick="checkURL()">Sprawdź</button>
+
+  <div id="result" class="result"></div>
+
+  <section id="reportSection">
+    <h2>Zgłoś nowy fraud</h2>
+    <input type="text" id="reportName" placeholder="Nazwa aplikacji lub adres URL" />
+    <textarea id="reportDesc" rows="3" placeholder="Opis oszustwa..."></textarea>
+    <br />
+    <button onclick="submitReport()">Zgłoś fraud</button>
+    <div id="reportResult" class="result"></div>
+  </section>
+
+  <section id="historySection">
+    <h2>Historia sprawdzanych adresów</h2>
+    <ul id="historyList"></ul>
+  </section>
+
+  <section id="chartSection">
+    <h2>📊 Statystyki zgłoszeń fraudów</h2>
+    <canvas id="fraudChart" width="600" height="300"></canvas>
+  </section>
+
+<script>
+  const apiKey = "AIzaSyCu-75BV2561-zJqnIqcuShaFbLX2CVVsE";
+
+  // --- Funkcja sprawdzająca URL w Google Safe Browsing API ---
+  async function checkURL() {
+    const url = document.getElementById("urlInput").value.trim();
+    const resultDiv = document.getElementById("result");
+
+    if (!url) {
+      resultDiv.textContent = "⚠️ Wpisz adres URL.";
+      resultDiv.className = "result";
+      return;
+    }
+
+    resultDiv.textContent = "🔄 Sprawdzam...";
+    resultDiv.className = "result";
+
+    // Zapisz do historii lokalnej
+    saveToHistory(url);
+    updateHistoryUI();
+
+    const apiUrl = `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${apiKey}`;
+
+    const requestBody = {
+      client: {
+        clientId: "fraud-checker-demo",
+        clientVersion: "1.0"
+      },
+      threatInfo: {
+        threatTypes: ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION"],
+        platformTypes: ["ANY_PLATFORM"],
+        threatEntryTypes: ["URL"],
+        threatEntries: [{ url }]
+      }
+    };
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        body: JSON.stringify(requestBody),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const data = await response.json();
+
+      if (data && data.matches) {
+        resultDiv.textContent = "🚨 Ten adres jest potencjalnie niebezpieczny!";
+        resultDiv.className = "result fraud";
+      } else {
+        resultDiv.textContent = "✅ Strona nie figuruje na liście zagrożeń.";
+        resultDiv.className = "result safe";
+      }
+    } catch (error) {
+      resultDiv.textContent = "❌ Błąd podczas sprawdzania. Sprawdź połączenie lub klucz API.";
+      resultDiv.className = "result";
+      console.error("Błąd:", error);
+    }
+  }
+
+  // --- Lokalna historia sprawdzonych URLi ---
+  function saveToHistory(url) {
+    let history = JSON.parse(localStorage.getItem("checkedURLs") || "[]");
+    if (!history.includes(url)) {
+      history.unshift(url);
+      if (history.length > 20) history.pop();
+      localStorage.setItem("checkedURLs", JSON.stringify(history));
+    }
+  }
+
+  function updateHistoryUI() {
+    const history = JSON.parse(localStorage.getItem("checkedURLs") || "[]");
+    const historyList = document.getElementById("historyList");
+    const dataList = document.getElementById("urlHistory");
+
+    historyList.innerHTML = "";
+    dataList.innerHTML = "";
+
+    history.forEach(item => {
+      // Lista do kliknięcia
+      const li = document.createElement("li");
+      li.textContent = item;
+      li.onclick = () => {
+        document.getElementById("urlInput").value = item;
+        document.getElementById("result").textContent = "";
+      };
+      historyList.appendChild(li);
+
+      // Datalist do podpowiedzi inputa
+      const option = document.createElement("option");
+      option.value = item;
+      dataList.appendChild(option);
+    });
+  }
+
+  // --- Zgłaszanie fraudu, zapisywane lokalnie ---
+  function submitReport() {
+    const name = document.getElementById("reportName").value.trim();
+    const desc = document.getElementById("reportDesc").value.trim();
+    const resultDiv = document.getElementById("reportResult");
+
+    if (!name || !desc) {
+      resultDiv.textContent = "⚠️ Uzupełnij wszystkie pola.";
+      resultDiv.className = "result";
+      return;
+    }
+
+    let reports = JSON.parse(localStorage.getItem("fraudReports") || "[]");
+    reports.push({ name, desc, date: new Date().toISOString() });
+    localStorage.setItem("fraudReports", JSON.stringify(reports));
+
+    resultDiv.textContent = "✅ Zgłoszenie zostało zapisane lokalnie.";
+    resultDiv.className = "result safe";
+
+    document.getElementById("reportName").value = "";
+    document.getElementById("reportDesc").value = "";
+
+    updateChart();
+  }
+
+  // --- Rysowanie wykresu zgłoszeń ---
+  function updateChart() {
+    const reports = JSON.parse(localStorage.getItem("fraudReports") || "[]");
+    // Zlicz zgłoszenia wg nazw (case insensitive)
+    const counts = {};
+    reports.forEach(r => {
+      const key = r.name.toLowerCase();
+      counts[key] = (counts[key] || 0) + 1;
+    });
+
+    const labels = Object.keys(counts);
+    const data = Object.values(counts);
+
+    if (window.fraudChart) {
+      window.fraudChart.destroy();
+    }
+
+    const ctx = document.getElementById("fraudChart").getContext("2d");
+    window.fraudChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Liczba zgłoszeń",
+          data,
+          backgroundColor: "rgba(217, 83, 79, 0.7)",
+          borderColor: "rgba(217, 83, 79, 1)",
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true, precision: 0 }
+        }
+      }
+    });
+  }
+
+  // --- Inicjalizacja po załadowaniu strony ---
+  window.onload = () => {
+    updateHistoryUI();
+    updateChart();
+  };
+</script>
+
+</body>
+</html>
