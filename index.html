@@ -2,182 +2,157 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <title>Niezbędnik_IT_STOP_FRAUD</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Niezbędnik IT - CyberBezpieczni</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 0; }
-    header { background: #263238; color: white; padding: 20px; text-align: center; }
-    section { background: white; margin: 20px auto; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    input, textarea, button, select { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; }
-    button { background: #1565c0; color: white; cursor: pointer; border: none; }
-    button:hover { background: #0d47a1; }
-    .result { margin-top: 10px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196f3; }
-    footer { text-align: center; padding: 20px; font-size: 0.9em; color: #666; }
-    h2 { color: #263238; }
-    .expert { display: none; margin-top: 10px; background: #fff3e0; padding: 10px; border-left: 4px solid #ff9800; }
-    a { color: #1565c0; text-decoration: none; }
+    :root {
+      --bg-color: #0d1117;
+      --text-color: #c9d1d9;
+      --accent-color: #58a6ff;
+      --card-bg: #161b22;
+      --danger-color: #ff6b6b;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto Mono', monospace;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 2rem;
+    }
+    h1 {
+      color: var(--accent-color);
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .container {
+      display: grid;
+      gap: 2rem;
+    }
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+    }
+    textarea, input, select, button {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      background-color: var(--accent-color);
+      color: #fff;
+      cursor: pointer;
+    }
+    .danger {
+      color: var(--danger-color);
+      font-weight: bold;
+    }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
+  <h1>Niezbędnik IT - CyberBezpieczni</h1>
+  <div class="container">
 
-<header>
-  <h1>Niezbędnik_IT_STOP_FRAUD</h1>
-  <p>Twoje narzędzia do walki z cyberzagrożeniami — frontend only</p>
-</header>
+    <div class="card">
+      <h2>Weryfikator fałszywych wiadomości</h2>
+      <textarea id="messageInput" rows="6" placeholder="Wklej treść wiadomości lub e-maila..."></textarea>
+      <label><input type="checkbox" id="expertMode"> Tryb eksperta</label>
+      <button onclick="verifyMessage()">Sprawdź wiadomość</button>
+      <p id="verificationResult"></p>
+    </div>
 
-<section>
-  <h2>🌍 Twoje IP i lokalizacja</h2>
-  <button onclick="getMyIP()">Pokaż dane</button>
-  <div class="result" id="geoResult"></div>
-</section>
+    <div class="card">
+      <h2>Sprawdzanie adresu IP / URL (urlscan.io)</h2>
+      <input type="text" id="urlInput" placeholder="Wprowadź adres URL lub IP...">
+      <button onclick="scanUrl()">Skanuj</button>
+      <p id="urlResult"></p>
+    </div>
 
-<section>
-  <h2>📨 Analizator phishingu (lokalny)</h2>
-  <textarea id="phishingText" placeholder="Wklej treść wiadomości..."></textarea>
-  <button onclick="analyzePhishing()">Analizuj</button>
-  <div class="result" id="phishingResult"></div>
-</section>
+    <div class="card">
+      <h2>Zaufane firmy i aplikacje (kryptowaluty)</h2>
+      <ul>
+        <li><strong>Ledger</strong> – portfele sprzętowe</li>
+        <li><strong>Trezor</strong> – portfele sprzętowe</li>
+        <li><strong>Kraken</strong> – giełda kryptowalut</li>
+        <li><strong>Binance</strong> – giełda (przy zachowaniu ostrożności)</li>
+        <li><strong>MetaMask</strong> – portfel Web3</li>
+        <li><strong>Trust Wallet</strong> – mobilny portfel</li>
+      </ul>
+    </div>
 
-<section>
-  <h2>🔍 Reputacja domeny (whoisxmlapi.com)</h2>
-  <input type="text" id="domainInput" placeholder="np. example.com">
-  <button onclick="checkDomain()">Sprawdź domenę</button>
-  <div class="result" id="domainResult"></div>
-</section>
-
-<section>
-  <h2>🧪 Sprawdź URL przez urlscan.io</h2>
-  <input type="text" id="urlInput" placeholder="np. https://strona.pl">
-  <button onclick="generateUrlScanLink()">Utwórz link</button>
-  <div class="result" id="urlscanResult"></div>
-</section>
-
-<section>
-  <h2>🚨 Zgłoś podejrzaną stronę (LocalStorage)</h2>
-  <input type="text" id="reportInput" placeholder="np. https://podejrzana.com">
-  <button onclick="saveReport()">Zapisz zgłoszenie</button>
-  <button onclick="showReports()">Pokaż moje zgłoszenia</button>
-  <div class="result" id="reportResult"></div>
-</section>
-
-<section>
-  <h2>🧠 Tryb eksperta</h2>
-  <button onclick="toggleExpert()">Włącz/Wyłącz tryb eksperta</button>
-  <div class="expert" id="expertPanel">
-    <h3>Dodatkowe narzędzia analizy:</h3>
-    <input type="text" id="expertInput" placeholder="Podaj URL lub IP">
-    <ul>
-      <li><a id="safeBrowsingLink" href="#" target="_blank">Google Safe Browsing</a></li>
-      <li><a id="virustotalLink" href="#" target="_blank">VirusTotal (URL scan)</a></li>
-      <li><a id="abuseipdbLink" href="#" target="_blank">AbuseIPDB (IP reputacja)</a></li>
-    </ul>
-    <button onclick="generateExpertLinks()">Generuj linki</button>
   </div>
-</section>
 
-<section>
-  <h2>📚 Edukacja</h2>
-  <ul>
-    <li>Nie klikaj w podejrzane linki</li>
-    <li>Sprawdzaj reputację domeny przed logowaniem</li>
-    <li>Używaj 2FA i silnych haseł</li>
-  </ul>
-</section>
+  <script>
+    const basicPhrases = [
+      "podaj login", "potrzebuję kodu", "kliknij w ten link", "zresetuj swoje hasło",
+      "wygrales nagrode", "twoje konto zostanie zablokowane", "pobierz załącznik",
+      "weryfikacja konta", "bank centralny", "przelej natychmiast", "tylko dzisiaj",
+      "zainstaluj aplikację", "doładuj konto", "darmowe krypto", "bitcoin giveaway",
+      "natychmiastowa akcja wymagana", "nieautoryzowana próba logowania",
+      "kliknij aby potwierdzić", "naciśnij tutaj", "konieczne potwierdzenie"
+    ];
 
-<footer>
-  &copy; 2025 Niezbędnik_IT_STOP_FRAUD — frontend edition
-</footer>
+    const expertPhrases = [
+      "twój bank", "ostatnie ostrzeżenie", "twój numer został wylosowany",
+      "nagroda gwarantowana", "weryfikacja płatności", "potrzebujemy twojego PINu",
+      "konto premium aktywowane", "konto zostało tymczasowo zablokowane",
+      "zbyt wiele prób logowania", "kliknij tutaj aby zachować bezpieczeństwo",
+      "proszę nie ignorować", "wymagane uaktualnienie danych",
+      "nie odpowiadaj na tę wiadomość", "zidentyfikowano problem z twoim kontem",
+      "wyjątkowa okazja", "dostęp ograniczony", "aktualizacja zabezpieczeń",
+      "podejrzana aktywność wykryta", "dokonaj płatności kryptowalutą",
+      "natychmiastowy przelew wymagany", "sprawdź załączony plik", "niepokojąca aktywność",
+      "weryfikacja tożsamości", "oficjalna wiadomość", "pilna wiadomość z działu IT",
+      "hasło wygasło", "kliknij aby zmienić hasło", "podaj dane logowania",
+      "weryfikacja logowania dwuskładnikowego"
+    ];
 
-<script>
-  async function getMyIP() {
-    const resultDiv = document.getElementById("geoResult");
-    resultDiv.textContent = "Pobieranie...";
-    try {
-      const res = await fetch("https://ipinfo.io/json?token=demo");
-      const data = await res.json();
-      resultDiv.innerHTML = `
-        IP: ${data.ip}<br>
-        Lokalizacja: ${data.city}, ${data.region}, ${data.country}<br>
-        Dostawca: ${data.org}
-      `;
-    } catch {
-      resultDiv.textContent = "Błąd pobierania danych.";
+    function verifyMessage() {
+      const text = document.getElementById('messageInput').value.toLowerCase();
+      const expert = document.getElementById('expertMode').checked;
+      const result = document.getElementById('verificationResult');
+      let found = [];
+
+      const phrases = expert ? basicPhrases.concat(expertPhrases) : basicPhrases;
+
+      phrases.forEach(phrase => {
+        if (text.includes(phrase)) {
+          found.push(phrase);
+        }
+      });
+
+      if (found.length > 0) {
+        result.innerHTML = `Wykryto podejrzane zwroty: <span class="danger">${found.join(', ')}</span>`;
+      } else {
+        result.textContent = 'Nie wykryto podejrzanych treści.';
+      }
     }
-  }
 
-  function analyzePhishing() {
-    const text = document.getElementById("phishingText").value.toLowerCase();
-    const resultDiv = document.getElementById("phishingResult");
-    const patterns = ["kliknij tutaj", "konto zablokowane", "zresetuj hasło", "weryfikacja", "nagroda"];
-    const found = patterns.filter(p => text.includes(p));
-    if (found.length > 0) {
-      resultDiv.innerHTML = `🚨 Możliwe oszustwo! Frazy: ${found.join(", ")}`;
-    } else {
-      resultDiv.textContent = "✅ Nie wykryto podejrzanych fraz.";
+    function scanUrl() {
+      const url = document.getElementById('urlInput').value.trim();
+      const result = document.getElementById('urlResult');
+      if (!url) {
+        result.textContent = 'Podaj adres URL lub IP.';
+        return;
+      }
+      const scanLink = `https://urlscan.io/domain/${encodeURIComponent(url)}`;
+      result.innerHTML = `Kliknij aby zobaczyć wyniki skanowania: <a href="${scanLink}" target="_blank" style="color: var(--accent-color);">${scanLink}</a>`;
     }
-  }
-
-  async function checkDomain() {
-    const domain = document.getElementById("domainInput").value.trim();
-    const resultDiv = document.getElementById("domainResult");
-    if (!domain) return resultDiv.textContent = "Wprowadź domenę.";
-    resultDiv.textContent = "Pobieranie...";
-    try {
-      const res = await fetch(`https://domain-reputation.whoisxmlapi.com/api/v1?apiKey=at_demo&domainName=${domain}`);
-      const data = await res.json();
-      resultDiv.innerHTML = `
-        Domena: ${data.domainName}<br>
-        Reputacja: ${data.reputationScore}/100<br>
-        Bezpieczna: ${data.maliciousActivity ? "🚫 NIE" : "✅ Tak"}
-      `;
-    } catch {
-      resultDiv.textContent = "Błąd API demo.";
-    }
-  }
-
-  function generateUrlScanLink() {
-    const url = document.getElementById("urlInput").value.trim();
-    const resultDiv = document.getElementById("urlscanResult");
-    if (!url) return resultDiv.textContent = "Wprowadź URL.";
-    const encoded = encodeURIComponent(url);
-    const link = `https://urlscan.io/search/#${encoded}`;
-    resultDiv.innerHTML = `<a href="${link}" target="_blank">${link}</a>`;
-  }
-
-  function saveReport() {
-    const url = document.getElementById("reportInput").value.trim();
-    if (!url) return alert("Podaj URL.");
-    let reports = JSON.parse(localStorage.getItem("fraudReports") || "[]");
-    reports.push({ url, date: new Date().toLocaleString() });
-    localStorage.setItem("fraudReports", JSON.stringify(reports));
-    document.getElementById("reportResult").textContent = "✅ Zgłoszenie zapisane.";
-  }
-
-  function showReports() {
-    const div = document.getElementById("reportResult");
-    const reports = JSON.parse(localStorage.getItem("fraudReports") || "[]");
-    if (reports.length === 0) return div.textContent = "Brak zgłoszeń.";
-    div.innerHTML = "<strong>Twoje zgłoszenia:</strong><ul>" + reports.map(r => `<li>${r.url} (${r.date})</li>`).join("") + "</ul>";
-  }
-
-  function toggleExpert() {
-    const panel = document.getElementById("expertPanel");
-    panel.style.display = panel.style.display === "none" ? "block" : "none";
-  }
-
-  function generateExpertLinks() {
-    const input = document.getElementById("expertInput").value.trim();
-    if (!input) return alert("Wprowadź URL lub IP.");
-    document.getElementById("safeBrowsingLink").href = `https://transparencyreport.google.com/safe-browsing/search?url=${encodeURIComponent(input)}`;
-    document.getElementById("virustotalLink").href = `https://www.virustotal.com/gui/search/${encodeURIComponent(input)}`;
-    document.getElementById("abuseipdbLink").href = `https://www.abuseipdb.com/check/${encodeURIComponent(input)}`;
-  }
-
-  // Domyślnie ukryj tryb eksperta
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("expertPanel").style.display = "none";
-  });
-</script>
-
+  </script>
 </body>
 </html>
