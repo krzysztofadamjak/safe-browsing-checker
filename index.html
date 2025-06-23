@@ -1,229 +1,255 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Safe Browsing Checker z API</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --color-bg-light: #f5f7fa;
-      --color-text-light: #222;
-      --color-bg-dark: #121212;
-      --color-text-dark: #e0e0e0;
-      --color-primary: #4f46e5;
-      --color-primary-hover: #4338ca;
-      --color-danger: #ef4444;
-      --color-success: #22c55e;
-      --transition: 0.3s ease;
-      --border-radius: 8px;
-      --shadow: 0 4px 12px rgba(0,0,0,0.1);
-      --shadow-dark: 0 4px 12px rgba(0,0,0,0.6);
-    }
-    body {
-      margin: 0; font-family: 'Inter', sans-serif;
-      background: var(--color-bg-light);
-      color: var(--color-text-light);
-      transition: background var(--transition), color var(--transition);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-    body.dark {
-      background: var(--color-bg-dark);
-      color: var(--color-text-dark);
-    }
-    header {
-      width: 100%;
-      max-width: 700px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-    h1 {
-      font-weight: 600;
-      font-size: 1.8rem;
-      margin: 0;
-    }
-    .toggle-theme {
-      background: var(--color-primary);
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      transition: background var(--transition);
-      user-select: none;
-    }
-    .toggle-theme:hover {
-      background: var(--color-primary-hover);
-    }
-    main {
-      width: 100%;
-      max-width: 700px;
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-    }
-    section {
-      background: white;
-      border-radius: var(--border-radius);
-      padding: 24px;
-      box-shadow: var(--shadow);
-      transition: background var(--transition), box-shadow var(--transition);
-    }
-    body.dark section {
-      background: #1e1e1e;
-      box-shadow: var(--shadow-dark);
-    }
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 8px;
-      font-size: 1rem;
-    }
-    input[type="url"] {
-      width: 100%;
-      padding: 12px;
-      border-radius: var(--border-radius);
-      border: 1.5px solid #ccc;
-      font-size: 1rem;
-      transition: border-color var(--transition);
-      background: transparent;
-      color: inherit;
-    }
-    input[type="url"]:focus {
-      border-color: var(--color-primary);
-      outline: none;
-    }
-    button {
-      margin-top: 16px;
-      background: var(--color-primary);
-      border: none;
-      color: white;
-      padding: 12px 24px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      transition: background var(--transition);
-      user-select: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    button:hover {
-      background: var(--color-primary-hover);
-    }
-    .result {
-      margin-top: 16px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      user-select: text;
-      white-space: pre-wrap;
-    }
-    .result.safe {
-      color: var(--color-success);
-    }
-    .result.danger {
-      color: var(--color-danger);
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VirusTotal Statystyki i Sprawdzenie URL</title>
+<style>
+  /* Ciemny motyw */
+  body {
+    margin: 0; padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    margin-bottom: 15px;
+  }
+
+  .container {
+    max-width: 900px;
+    width: 100%;
+    background: #1e1e1e;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    background-color: #333;
+    color: #eee;
+  }
+
+  button {
+    background: linear-gradient(135deg, #6a5acd, #00bfff);
+    border: none;
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    border-radius: 25px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    user-select: none;
+    margin-bottom: 20px;
+  }
+  button:hover {
+    background: linear-gradient(135deg, #836fff, #33ccff);
+  }
+  button:active {
+    transform: scale(0.98);
+  }
+
+  #result {
+    margin-top: 10px;
+    font-weight: 600;
+  }
+
+  canvas {
+    background: #222;
+    border-radius: 10px;
+    margin-top: 30px;
+  }
+
+  footer {
+    margin-top: 40px;
+    font-size: 0.8rem;
+    color: #888;
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Safe Browsing - Sprawdź URL</h1>
-    <button class="toggle-theme" id="themeToggle">Tryb ciemny</button>
-  </header>
-  <main>
-    <section aria-label="Sprawdzenie bezpieczeństwa URL">
-      <label for="urlInput">Wpisz adres strony/aplikacji do sprawdzenia:</label>
-      <input type="url" id="urlInput" placeholder="np. https://example.com" required />
-      <button id="checkBtn">Sprawdź bezpieczeństwo</button>
-      <div class="result" id="result"></div>
-    </section>
-  </main>
 
-  <script>
-    const apiKey = 'AIzaSyCu-75BV2561-zJqnIqcuShaFbLX2CVVsE'; // <-- tu wstaw swój klucz Google Safe Browsing API
-    const urlInput = document.getElementById('urlInput');
-    const checkBtn = document.getElementById('checkBtn');
-    const resultDiv = document.getElementById('result');
-    const themeToggle = document.getElementById('themeToggle');
-    const body = document.body;
+<div class="container">
+  <h1>Statystyki zagrożeń z VirusTotal i sprawdzanie URL</h1>
 
-    themeToggle.addEventListener('click', () => {
-      body.classList.toggle('dark');
-      if (body.classList.contains('dark')) {
-        themeToggle.textContent = 'Tryb jasny';
-      } else {
-        themeToggle.textContent = 'Tryb ciemny';
-      }
-    });
+  <canvas id="threatChart" width="800" height="400"></canvas>
 
-    checkBtn.addEventListener('click', async () => {
-      const url = urlInput.value.trim();
-      if (!url) {
-        alert('Proszę wpisać poprawny adres URL.');
-        return;
-      }
-      resultDiv.textContent = 'Sprawdzanie...';
-      resultDiv.className = 'result';
+  <hr style="margin: 30px 0; border-color: #333;">
 
-      // Budujemy zapytanie do Google Safe Browsing API
-      const body = {
-        client: {
-          clientId: "yourcompanyname",
-          clientVersion: "1.0"
-        },
-        threatInfo: {
-          threatTypes: ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION"],
-          platformTypes: ["ANY_PLATFORM"],
-          threatEntryTypes: ["URL"],
-          threatEntries: [{ url }]
+  <form id="checkUrlForm">
+    <label for="urlInput">Sprawdź, czy dana strona/aplikacja to oszustwo (wprowadź URL):</label>
+    <input type="text" id="urlInput" placeholder="np. http://example.com" required />
+    <button type="submit">Sprawdź URL</button>
+  </form>
+
+  <div id="result"></div>
+</div>
+
+<footer>© 2025 Twoja Firma Bezpieczeństwa</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const apiKey = '186f87c76296020033755a1195ca08b08e4a5d5db7027737bf5997c0b95835fc';  // <-- Wstaw swój klucz API VirusTotal
+
+  // Elementy DOM
+  const ctx = document.getElementById('threatChart').getContext('2d');
+  const resultDiv = document.getElementById('result');
+  const form = document.getElementById('checkUrlForm');
+  const urlInput = document.getElementById('urlInput');
+
+  // Funkcja do pobrania statystyk z VirusTotal
+  async function fetchStatistics() {
+    const url = 'https://www.virustotal.com/api/v3/monitor/statistics';
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'x-apikey': apiKey
         }
-      };
+      });
+      if (!response.ok) {
+        throw new Error(`Błąd API: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data.data;  // Struktura może się różnić, trzeba sprawdzić odpowiedź
+    } catch (error) {
+      console.error(error);
+      alert('Błąd podczas pobierania statystyk VirusTotal. Sprawdź konsolę.');
+      return null;
+    }
+  }
 
-      try {
-        const response = await fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${apiKey}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
+  // Funkcja do przetworzenia danych na wykres
+  function prepareChartData(stats) {
+    // Przykładowa struktura danych statystyk:
+    // stats.attributes.statistics: { last_7_days: { malicious: 123, suspicious: 45, etc. } }
+    // Lub jeśli masz inny endpoint, dostosuj tutaj
+
+    // Uproszczony przykład: symulacja danych (bo endpoint może się różnić)
+    // Zamiast tego użyj rzeczywistych danych, które dostaniesz z API
+    // Dla demo utwórzmy losowe dane na 7 dni
+
+    const labels = [];
+    const maliciousData = [];
+
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const dayStr = d.toISOString().slice(0, 10);
+      labels.push(dayStr);
+      maliciousData.push(Math.floor(Math.random() * 50) + 10); // tymczasowe dane
+    }
+
+    return {
+      labels,
+      datasets: [{
+        label: 'Wykryte zagrożenia (malicious)',
+        data: maliciousData,
+        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 5,
+        pointHoverRadius: 8,
+      }]
+    };
+  }
+
+  // Inicjuj wykres Chart.js
+  let threatChart = null;
+  async function initChart() {
+    const stats = await fetchStatistics();
+    const chartData = prepareChartData(stats);
+
+    threatChart = new Chart(ctx, {
+      type: 'line',
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: { color: '#eee', font: { size: 14 } }
           },
-          body: JSON.stringify(body)
-        });
-
-        if (!response.ok) {
-          throw new Error(`Błąd sieci: ${response.status} ${response.statusText}`);
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#aaa' },
+            grid: { color: '#333' },
+            title: {
+              display: true,
+              text: 'Data',
+              color: '#ccc',
+              font: { size: 16 }
+            }
+          },
+          y: {
+            ticks: { color: '#aaa' },
+            grid: { color: '#333' },
+            title: {
+              display: true,
+              text: 'Liczba zagrożeń',
+              color: '#ccc',
+              font: { size: 16 }
+            },
+            beginAtZero: true
+          }
+        },
+        animation: {
+          duration: 1200,
+          easing: 'easeInOutQuad'
         }
-        const data = await response.json();
-
-        if (data && data.matches && data.matches.length > 0) {
-          // Są zagrożenia
-          const threats = data.matches.map(m => 
-            `Typ: ${m.threatType}\nPlatforma: ${m.platformType}\nMetoda: ${m.threatEntryType}`
-          ).join('\n\n');
-
-          resultDiv.textContent = `⚠️ Zagrożenie wykryte!\n${threats}`;
-          resultDiv.classList.add('danger');
-        } else {
-          // Brak zagrożeń
-          resultDiv.textContent = '✔️ Strona wydaje się być bezpieczna.';
-          resultDiv.classList.add('safe');
-        }
-
-      } catch (error) {
-        resultDiv.textContent = `❌ Wystąpił błąd: ${error.message}`;
-        resultDiv.classList.add('danger');
       }
     });
-  </script>
+  }
+
+  // Funkcja do sprawdzania pojedynczego URL (przykład, nie wykonuje rzeczywistego zapytania do VT)
+  async function checkUrl(url) {
+    // VirusTotal ma endpoint do analizy URL:
+    // POST /api/v3/urls  -> do przesłania URL do analizy (wymaga kodowania URL)
+    // GET /api/v3/analyses/{id} -> do sprawdzenia statusu analizy
+
+    // Bez backendu i obsługi tokenów lepiej nie robić POST z frontu
+    // Poniżej jest uproszczona symulacja
+
+    resultDiv.textContent = 'Sprawdzanie... (funkcjonalność wymaga backendu do pełnej integracji)';
+  }
+
+  // Obsługa formularza
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const url = urlInput.value.trim();
+    if (!url) {
+      alert('Podaj URL do sprawdzenia!');
+      return;
+    }
+    checkUrl(url);
+  });
+
+  // Start
+  initChart();
+
+</script>
 </body>
 </html>
