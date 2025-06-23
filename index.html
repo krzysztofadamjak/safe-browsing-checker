@@ -8,12 +8,13 @@
     body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 0; }
     header { background: #263238; color: white; padding: 20px; text-align: center; }
     section { background: white; margin: 20px auto; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    input, textarea, button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    input, textarea, button, select { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; }
     button { background: #1565c0; color: white; cursor: pointer; border: none; }
     button:hover { background: #0d47a1; }
     .result { margin-top: 10px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196f3; }
     footer { text-align: center; padding: 20px; font-size: 0.9em; color: #666; }
     h2 { color: #263238; }
+    .expert { display: none; margin-top: 10px; background: #fff3e0; padding: 10px; border-left: 4px solid #ff9800; }
     a { color: #1565c0; text-decoration: none; }
   </style>
 </head>
@@ -21,7 +22,7 @@
 
 <header>
   <h1>Niezbędnik_IT_STOP_FRAUD</h1>
-  <p>Twoje narzędzia do walki z cyberzagrożeniami — bez logowania, bez backendu</p>
+  <p>Twoje narzędzia do walki z cyberzagrożeniami — frontend only</p>
 </header>
 
 <section>
@@ -32,7 +33,7 @@
 
 <section>
   <h2>📨 Analizator phishingu (lokalny)</h2>
-  <textarea id="phishingText" placeholder="Wklej wiadomość e-mail lub SMS"></textarea>
+  <textarea id="phishingText" placeholder="Wklej treść wiadomości..."></textarea>
   <button onclick="analyzePhishing()">Analizuj</button>
   <div class="result" id="phishingResult"></div>
 </section>
@@ -46,23 +47,45 @@
 
 <section>
   <h2>🧪 Sprawdź URL przez urlscan.io</h2>
-  <input type="text" id="urlInput" placeholder="np. https://podejrzana-strona.pl">
-  <button onclick="generateUrlScanLink()">Utwórz link do analizy</button>
+  <input type="text" id="urlInput" placeholder="np. https://strona.pl">
+  <button onclick="generateUrlScanLink()">Utwórz link</button>
   <div class="result" id="urlscanResult"></div>
+</section>
+
+<section>
+  <h2>🚨 Zgłoś podejrzaną stronę (LocalStorage)</h2>
+  <input type="text" id="reportInput" placeholder="np. https://podejrzana.com">
+  <button onclick="saveReport()">Zapisz zgłoszenie</button>
+  <button onclick="showReports()">Pokaż moje zgłoszenia</button>
+  <div class="result" id="reportResult"></div>
+</section>
+
+<section>
+  <h2>🧠 Tryb eksperta</h2>
+  <button onclick="toggleExpert()">Włącz/Wyłącz tryb eksperta</button>
+  <div class="expert" id="expertPanel">
+    <h3>Dodatkowe narzędzia analizy:</h3>
+    <input type="text" id="expertInput" placeholder="Podaj URL lub IP">
+    <ul>
+      <li><a id="safeBrowsingLink" href="#" target="_blank">Google Safe Browsing</a></li>
+      <li><a id="virustotalLink" href="#" target="_blank">VirusTotal (URL scan)</a></li>
+      <li><a id="abuseipdbLink" href="#" target="_blank">AbuseIPDB (IP reputacja)</a></li>
+    </ul>
+    <button onclick="generateExpertLinks()">Generuj linki</button>
+  </div>
 </section>
 
 <section>
   <h2>📚 Edukacja</h2>
   <ul>
-    <li>Nie klikaj w linki z nieznanych źródeł</li>
-    <li>Sprawdzaj, czy domena wygląda podejrzanie</li>
-    <li>Uważaj na pilne wiadomości proszące o dane logowania</li>
-    <li>Korzystaj z 2FA i aktualizuj systemy</li>
+    <li>Nie klikaj w podejrzane linki</li>
+    <li>Sprawdzaj reputację domeny przed logowaniem</li>
+    <li>Używaj 2FA i silnych haseł</li>
   </ul>
 </section>
 
 <footer>
-  &copy; 2025 Niezbędnik_IT_STOP_FRAUD. Wszystkie prawa zastrzeżone.
+  &copy; 2025 Niezbędnik_IT_STOP_FRAUD — frontend edition
 </footer>
 
 <script>
@@ -85,51 +108,75 @@
   function analyzePhishing() {
     const text = document.getElementById("phishingText").value.toLowerCase();
     const resultDiv = document.getElementById("phishingResult");
-    const patterns = [
-      "kliknij tutaj", "konto zablokowane", "zresetuj hasło", "weryfikacja", 
-      "pilne", "nagroda", "czekamy na twoją odpowiedź", "zwycięzca"
-    ];
+    const patterns = ["kliknij tutaj", "konto zablokowane", "zresetuj hasło", "weryfikacja", "nagroda"];
     const found = patterns.filter(p => text.includes(p));
     if (found.length > 0) {
-      resultDiv.innerHTML = `🚨 Możliwe oszustwo!<br><strong>Frazy:</strong> ${found.join(", ")}`;
+      resultDiv.innerHTML = `🚨 Możliwe oszustwo! Frazy: ${found.join(", ")}`;
     } else {
-      resultDiv.textContent = "✅ Nie znaleziono podejrzanych fraz.";
+      resultDiv.textContent = "✅ Nie wykryto podejrzanych fraz.";
     }
   }
 
   async function checkDomain() {
     const domain = document.getElementById("domainInput").value.trim();
     const resultDiv = document.getElementById("domainResult");
-    if (!domain) {
-      resultDiv.textContent = "Wprowadź domenę.";
-      return;
-    }
-    resultDiv.textContent = "Pobieranie danych...";
+    if (!domain) return resultDiv.textContent = "Wprowadź domenę.";
+    resultDiv.textContent = "Pobieranie...";
     try {
       const res = await fetch(`https://domain-reputation.whoisxmlapi.com/api/v1?apiKey=at_demo&domainName=${domain}`);
       const data = await res.json();
       resultDiv.innerHTML = `
-        <strong>Domena:</strong> ${data.domainName}<br>
-        <strong>Reputacja:</strong> ${data.reputationScore}/100<br>
-        <strong>Bezpieczna?</strong> ${data.maliciousActivity ? "🚫 NIE" : "✅ Tak"}<br>
-        <strong>Ostatnia aktywność:</strong> ${data.recent ? "Niedawno aktywna" : "Brak danych"}
+        Domena: ${data.domainName}<br>
+        Reputacja: ${data.reputationScore}/100<br>
+        Bezpieczna: ${data.maliciousActivity ? "🚫 NIE" : "✅ Tak"}
       `;
     } catch {
-      resultDiv.textContent = "Błąd pobierania danych lub brak dostępu do API demo.";
+      resultDiv.textContent = "Błąd API demo.";
     }
   }
 
   function generateUrlScanLink() {
     const url = document.getElementById("urlInput").value.trim();
     const resultDiv = document.getElementById("urlscanResult");
-    if (!url) {
-      resultDiv.textContent = "Wprowadź adres URL.";
-      return;
-    }
+    if (!url) return resultDiv.textContent = "Wprowadź URL.";
     const encoded = encodeURIComponent(url);
-    const scanLink = `https://urlscan.io/search/#${encoded}`;
-    resultDiv.innerHTML = `Kliknij, aby zobaczyć skan:<br><a href="${scanLink}" target="_blank">${scanLink}</a>`;
+    const link = `https://urlscan.io/search/#${encoded}`;
+    resultDiv.innerHTML = `<a href="${link}" target="_blank">${link}</a>`;
   }
+
+  function saveReport() {
+    const url = document.getElementById("reportInput").value.trim();
+    if (!url) return alert("Podaj URL.");
+    let reports = JSON.parse(localStorage.getItem("fraudReports") || "[]");
+    reports.push({ url, date: new Date().toLocaleString() });
+    localStorage.setItem("fraudReports", JSON.stringify(reports));
+    document.getElementById("reportResult").textContent = "✅ Zgłoszenie zapisane.";
+  }
+
+  function showReports() {
+    const div = document.getElementById("reportResult");
+    const reports = JSON.parse(localStorage.getItem("fraudReports") || "[]");
+    if (reports.length === 0) return div.textContent = "Brak zgłoszeń.";
+    div.innerHTML = "<strong>Twoje zgłoszenia:</strong><ul>" + reports.map(r => `<li>${r.url} (${r.date})</li>`).join("") + "</ul>";
+  }
+
+  function toggleExpert() {
+    const panel = document.getElementById("expertPanel");
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+  }
+
+  function generateExpertLinks() {
+    const input = document.getElementById("expertInput").value.trim();
+    if (!input) return alert("Wprowadź URL lub IP.");
+    document.getElementById("safeBrowsingLink").href = `https://transparencyreport.google.com/safe-browsing/search?url=${encodeURIComponent(input)}`;
+    document.getElementById("virustotalLink").href = `https://www.virustotal.com/gui/search/${encodeURIComponent(input)}`;
+    document.getElementById("abuseipdbLink").href = `https://www.abuseipdb.com/check/${encodeURIComponent(input)}`;
+  }
+
+  // Domyślnie ukryj tryb eksperta
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("expertPanel").style.display = "none";
+  });
 </script>
 
 </body>
