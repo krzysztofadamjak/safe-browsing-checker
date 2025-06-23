@@ -1,255 +1,136 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>VirusTotal Statystyki i Sprawdzenie URL</title>
-<style>
-  /* Ciemny motyw */
-  body {
-    margin: 0; padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #121212;
-    color: #eee;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  h1 {
-    margin-bottom: 15px;
-  }
-
-  .container {
-    max-width: 900px;
-    width: 100%;
-    background: #1e1e1e;
-    border-radius: 10px;
-    padding: 25px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.7);
-  }
-
-  label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-  }
-
-  input[type="text"] {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    margin-bottom: 12px;
-    font-size: 1rem;
-    background-color: #333;
-    color: #eee;
-  }
-
-  button {
-    background: linear-gradient(135deg, #6a5acd, #00bfff);
-    border: none;
-    padding: 12px 24px;
-    font-size: 1.1rem;
-    border-radius: 25px;
-    color: white;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    user-select: none;
-    margin-bottom: 20px;
-  }
-  button:hover {
-    background: linear-gradient(135deg, #836fff, #33ccff);
-  }
-  button:active {
-    transform: scale(0.98);
-  }
-
-  #result {
-    margin-top: 10px;
-    font-weight: 600;
-  }
-
-  canvas {
-    background: #222;
-    border-radius: 10px;
-    margin-top: 30px;
-  }
-
-  footer {
-    margin-top: 40px;
-    font-size: 0.8rem;
-    color: #888;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Niezbędnik_IT_STOP_FRAUD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 0; }
+    header { background: #263238; color: white; padding: 20px; text-align: center; }
+    section { background: white; margin: 20px auto; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, textarea, button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #1565c0; color: white; cursor: pointer; border: none; }
+    button:hover { background: #0d47a1; }
+    .result { margin-top: 10px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196f3; }
+    footer { text-align: center; padding: 20px; font-size: 0.9em; color: #666; }
+    h2 { color: #263238; }
+    a { color: #1565c0; text-decoration: none; }
+  </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>Statystyki zagrożeń z VirusTotal i sprawdzanie URL</h1>
+<header>
+  <h1>Niezbędnik_IT_STOP_FRAUD</h1>
+  <p>Twoje narzędzia do walki z cyberzagrożeniami — bez logowania, bez backendu</p>
+</header>
 
-  <canvas id="threatChart" width="800" height="400"></canvas>
+<section>
+  <h2>🌍 Twoje IP i lokalizacja</h2>
+  <button onclick="getMyIP()">Pokaż dane</button>
+  <div class="result" id="geoResult"></div>
+</section>
 
-  <hr style="margin: 30px 0; border-color: #333;">
+<section>
+  <h2>📨 Analizator phishingu (lokalny)</h2>
+  <textarea id="phishingText" placeholder="Wklej wiadomość e-mail lub SMS"></textarea>
+  <button onclick="analyzePhishing()">Analizuj</button>
+  <div class="result" id="phishingResult"></div>
+</section>
 
-  <form id="checkUrlForm">
-    <label for="urlInput">Sprawdź, czy dana strona/aplikacja to oszustwo (wprowadź URL):</label>
-    <input type="text" id="urlInput" placeholder="np. http://example.com" required />
-    <button type="submit">Sprawdź URL</button>
-  </form>
+<section>
+  <h2>🔍 Reputacja domeny (whoisxmlapi.com)</h2>
+  <input type="text" id="domainInput" placeholder="np. example.com">
+  <button onclick="checkDomain()">Sprawdź domenę</button>
+  <div class="result" id="domainResult"></div>
+</section>
 
-  <div id="result"></div>
-</div>
+<section>
+  <h2>🧪 Sprawdź URL przez urlscan.io</h2>
+  <input type="text" id="urlInput" placeholder="np. https://podejrzana-strona.pl">
+  <button onclick="generateUrlScanLink()">Utwórz link do analizy</button>
+  <div class="result" id="urlscanResult"></div>
+</section>
 
-<footer>© 2025 Twoja Firma Bezpieczeństwa</footer>
+<section>
+  <h2>📚 Edukacja</h2>
+  <ul>
+    <li>Nie klikaj w linki z nieznanych źródeł</li>
+    <li>Sprawdzaj, czy domena wygląda podejrzanie</li>
+    <li>Uważaj na pilne wiadomości proszące o dane logowania</li>
+    <li>Korzystaj z 2FA i aktualizuj systemy</li>
+  </ul>
+</section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<footer>
+  &copy; 2025 Niezbędnik_IT_STOP_FRAUD. Wszystkie prawa zastrzeżone.
+</footer>
+
 <script>
-  const apiKey = '186f87c76296020033755a1195ca08b08e4a5d5db7027737bf5997c0b95835fc';  // <-- Wstaw swój klucz API VirusTotal
-
-  // Elementy DOM
-  const ctx = document.getElementById('threatChart').getContext('2d');
-  const resultDiv = document.getElementById('result');
-  const form = document.getElementById('checkUrlForm');
-  const urlInput = document.getElementById('urlInput');
-
-  // Funkcja do pobrania statystyk z VirusTotal
-  async function fetchStatistics() {
-    const url = 'https://www.virustotal.com/api/v3/monitor/statistics';
-
+  async function getMyIP() {
+    const resultDiv = document.getElementById("geoResult");
+    resultDiv.textContent = "Pobieranie...";
     try {
-      const response = await fetch(url, {
-        headers: {
-          'x-apikey': apiKey
-        }
-      });
-      if (!response.ok) {
-        throw new Error(`Błąd API: ${response.status} ${response.statusText}`);
-      }
-      const data = await response.json();
-      return data.data;  // Struktura może się różnić, trzeba sprawdzić odpowiedź
-    } catch (error) {
-      console.error(error);
-      alert('Błąd podczas pobierania statystyk VirusTotal. Sprawdź konsolę.');
-      return null;
+      const res = await fetch("https://ipinfo.io/json?token=demo");
+      const data = await res.json();
+      resultDiv.innerHTML = `
+        IP: ${data.ip}<br>
+        Lokalizacja: ${data.city}, ${data.region}, ${data.country}<br>
+        Dostawca: ${data.org}
+      `;
+    } catch {
+      resultDiv.textContent = "Błąd pobierania danych.";
     }
   }
 
-  // Funkcja do przetworzenia danych na wykres
-  function prepareChartData(stats) {
-    // Przykładowa struktura danych statystyk:
-    // stats.attributes.statistics: { last_7_days: { malicious: 123, suspicious: 45, etc. } }
-    // Lub jeśli masz inny endpoint, dostosuj tutaj
-
-    // Uproszczony przykład: symulacja danych (bo endpoint może się różnić)
-    // Zamiast tego użyj rzeczywistych danych, które dostaniesz z API
-    // Dla demo utwórzmy losowe dane na 7 dni
-
-    const labels = [];
-    const maliciousData = [];
-
-    const today = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const dayStr = d.toISOString().slice(0, 10);
-      labels.push(dayStr);
-      maliciousData.push(Math.floor(Math.random() * 50) + 10); // tymczasowe dane
+  function analyzePhishing() {
+    const text = document.getElementById("phishingText").value.toLowerCase();
+    const resultDiv = document.getElementById("phishingResult");
+    const patterns = [
+      "kliknij tutaj", "konto zablokowane", "zresetuj hasło", "weryfikacja", 
+      "pilne", "nagroda", "czekamy na twoją odpowiedź", "zwycięzca"
+    ];
+    const found = patterns.filter(p => text.includes(p));
+    if (found.length > 0) {
+      resultDiv.innerHTML = `🚨 Możliwe oszustwo!<br><strong>Frazy:</strong> ${found.join(", ")}`;
+    } else {
+      resultDiv.textContent = "✅ Nie znaleziono podejrzanych fraz.";
     }
-
-    return {
-      labels,
-      datasets: [{
-        label: 'Wykryte zagrożenia (malicious)',
-        data: maliciousData,
-        borderColor: 'rgba(255, 99, 132, 1)',
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 5,
-        pointHoverRadius: 8,
-      }]
-    };
   }
 
-  // Inicjuj wykres Chart.js
-  let threatChart = null;
-  async function initChart() {
-    const stats = await fetchStatistics();
-    const chartData = prepareChartData(stats);
-
-    threatChart = new Chart(ctx, {
-      type: 'line',
-      data: chartData,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            labels: { color: '#eee', font: { size: 14 } }
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false
-          }
-        },
-        scales: {
-          x: {
-            ticks: { color: '#aaa' },
-            grid: { color: '#333' },
-            title: {
-              display: true,
-              text: 'Data',
-              color: '#ccc',
-              font: { size: 16 }
-            }
-          },
-          y: {
-            ticks: { color: '#aaa' },
-            grid: { color: '#333' },
-            title: {
-              display: true,
-              text: 'Liczba zagrożeń',
-              color: '#ccc',
-              font: { size: 16 }
-            },
-            beginAtZero: true
-          }
-        },
-        animation: {
-          duration: 1200,
-          easing: 'easeInOutQuad'
-        }
-      }
-    });
-  }
-
-  // Funkcja do sprawdzania pojedynczego URL (przykład, nie wykonuje rzeczywistego zapytania do VT)
-  async function checkUrl(url) {
-    // VirusTotal ma endpoint do analizy URL:
-    // POST /api/v3/urls  -> do przesłania URL do analizy (wymaga kodowania URL)
-    // GET /api/v3/analyses/{id} -> do sprawdzenia statusu analizy
-
-    // Bez backendu i obsługi tokenów lepiej nie robić POST z frontu
-    // Poniżej jest uproszczona symulacja
-
-    resultDiv.textContent = 'Sprawdzanie... (funkcjonalność wymaga backendu do pełnej integracji)';
-  }
-
-  // Obsługa formularza
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const url = urlInput.value.trim();
-    if (!url) {
-      alert('Podaj URL do sprawdzenia!');
+  async function checkDomain() {
+    const domain = document.getElementById("domainInput").value.trim();
+    const resultDiv = document.getElementById("domainResult");
+    if (!domain) {
+      resultDiv.textContent = "Wprowadź domenę.";
       return;
     }
-    checkUrl(url);
-  });
+    resultDiv.textContent = "Pobieranie danych...";
+    try {
+      const res = await fetch(`https://domain-reputation.whoisxmlapi.com/api/v1?apiKey=at_demo&domainName=${domain}`);
+      const data = await res.json();
+      resultDiv.innerHTML = `
+        <strong>Domena:</strong> ${data.domainName}<br>
+        <strong>Reputacja:</strong> ${data.reputationScore}/100<br>
+        <strong>Bezpieczna?</strong> ${data.maliciousActivity ? "🚫 NIE" : "✅ Tak"}<br>
+        <strong>Ostatnia aktywność:</strong> ${data.recent ? "Niedawno aktywna" : "Brak danych"}
+      `;
+    } catch {
+      resultDiv.textContent = "Błąd pobierania danych lub brak dostępu do API demo.";
+    }
+  }
 
-  // Start
-  initChart();
-
+  function generateUrlScanLink() {
+    const url = document.getElementById("urlInput").value.trim();
+    const resultDiv = document.getElementById("urlscanResult");
+    if (!url) {
+      resultDiv.textContent = "Wprowadź adres URL.";
+      return;
+    }
+    const encoded = encodeURIComponent(url);
+    const scanLink = `https://urlscan.io/search/#${encoded}`;
+    resultDiv.innerHTML = `Kliknij, aby zobaczyć skan:<br><a href="${scanLink}" target="_blank">${scanLink}</a>`;
+  }
 </script>
+
 </body>
 </html>
