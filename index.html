@@ -1,66 +1,138 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Niezbędnik IT - CyberBezpieczni</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg-color: #0d1117;
+      --bg-color: #0b1117;
+      --card-bg: #161b22;
       --text-color: #c9d1d9;
       --accent-color: #58a6ff;
-      --card-bg: #161b22;
       --danger-color: #ff6b6b;
+      --success-color: #2ea043;
+      --border-color: #30363d;
     }
     * {
-      margin: 0;
-      padding: 0;
       box-sizing: border-box;
-      font-family: 'Roboto Mono', monospace;
     }
     body {
+      margin: 0;
+      font-family: 'Fira Mono', monospace, monospace;
       background-color: var(--bg-color);
       color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 2rem;
     }
     h1 {
       color: var(--accent-color);
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      font-size: 2.8rem;
+      text-align: center;
+      user-select: none;
     }
     .container {
       display: grid;
       gap: 2rem;
+      max-width: 900px;
+      width: 100%;
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 720px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
     }
     .card {
-      background-color: var(--card-bg);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 10px rgb(88 166 255 / 0.2);
+      display: flex;
+      flex-direction: column;
     }
-    textarea, input, select, button {
-      width: 100%;
-      margin-top: 0.5rem;
-      padding: 0.75rem;
-      border: none;
-      border-radius: 0.5rem;
+    .card h2 {
+      margin-top: 0;
+      color: var(--accent-color);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+    textarea, input[type="text"] {
+      background: #0d1117;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-color);
+      font-family: inherit;
       font-size: 1rem;
+      padding: 0.75rem;
+      resize: vertical;
+      min-height: 6rem;
+      transition: border-color 0.2s ease-in-out;
+    }
+    textarea:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 8px var(--accent-color);
     }
     button {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      font-size: 1.1rem;
       background-color: var(--accent-color);
-      color: #fff;
+      border: none;
+      border-radius: 8px;
+      color: white;
       cursor: pointer;
+      font-weight: 700;
+      user-select: none;
+      transition: background-color 0.3s ease;
     }
-    .danger {
-      color: var(--danger-color);
-      font-weight: bold;
+    button:hover {
+      background-color: #2f75d9;
     }
     label {
+      margin-top: 1rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      font-size: 0.95rem;
+      user-select: none;
+      cursor: pointer;
+    }
+    input[type="checkbox"] {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+    #verificationResult, #urlResult {
       margin-top: 1rem;
+      font-weight: 700;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .danger {
+      color: var(--danger-color);
+    }
+    .warning {
+      color: #f9c74f;
+    }
+    .safe {
+      color: var(--success-color);
+    }
+    ul {
+      padding-left: 1.2rem;
+      line-height: 1.5;
+    }
+    ul li strong {
+      color: var(--accent-color);
     }
   </style>
 </head>
@@ -68,22 +140,22 @@
   <h1>Niezbędnik IT - CyberBezpieczni</h1>
   <div class="container">
 
-    <div class="card">
+    <section class="card" aria-label="Weryfikator fałszywych wiadomości">
       <h2>Weryfikator fałszywych wiadomości</h2>
-      <textarea id="messageInput" rows="6" placeholder="Wklej treść wiadomości lub e-maila..."></textarea>
-      <label><input type="checkbox" id="expertMode"> Tryb eksperta</label>
-      <button onclick="verifyMessage()">Sprawdź wiadomość</button>
-      <p id="verificationResult"></p>
-    </div>
+      <textarea id="messageInput" placeholder="Wklej treść wiadomości lub e-maila..."></textarea>
+      <label for="expertMode"><input type="checkbox" id="expertMode" /> Tryb eksperta</label>
+      <button id="verifyBtn">Sprawdź wiadomość</button>
+      <div id="verificationResult" aria-live="polite"></div>
+    </section>
 
-    <div class="card">
+    <section class="card" aria-label="Sprawdzanie adresu IP lub URL">
       <h2>Sprawdzanie adresu IP / URL (urlscan.io)</h2>
-      <input type="text" id="urlInput" placeholder="Wprowadź adres URL lub IP...">
-      <button onclick="scanUrl()">Skanuj</button>
-      <p id="urlResult"></p>
-    </div>
+      <input type="text" id="urlInput" placeholder="Wprowadź adres URL lub IP..." />
+      <button id="scanBtn">Skanuj</button>
+      <div id="urlResult" aria-live="polite"></div>
+    </section>
 
-    <div class="card">
+    <section class="card" style="grid-column: span 2;" aria-label="Zaufane firmy i aplikacje kryptowalutowe">
       <h2>Zaufane firmy i aplikacje (kryptowaluty)</h2>
       <ul>
         <li><strong>Ledger</strong> – portfele sprzętowe</li>
@@ -93,66 +165,121 @@
         <li><strong>MetaMask</strong> – portfel Web3</li>
         <li><strong>Trust Wallet</strong> – mobilny portfel</li>
       </ul>
-    </div>
+    </section>
 
   </div>
 
-  <script>
-    const basicPhrases = [
-      "podaj login", "potrzebuję kodu", "kliknij w ten link", "zresetuj swoje hasło",
-      "wygrales nagrode", "twoje konto zostanie zablokowane", "pobierz załącznik",
-      "weryfikacja konta", "bank centralny", "przelej natychmiast", "tylko dzisiaj",
-      "zainstaluj aplikację", "doładuj konto", "darmowe krypto", "bitcoin giveaway",
-      "natychmiastowa akcja wymagana", "nieautoryzowana próba logowania",
-      "kliknij aby potwierdzić", "naciśnij tutaj", "konieczne potwierdzenie"
-    ];
+<script>
+  // Złożone frazy podstawowe i eksperckie do wykrywania fałszywych wiadomości
+  const basicPhrases = [
+    "podaj login", "potrzebuję kodu", "kliknij w ten link", "zresetuj swoje hasło",
+    "wygrałeś nagrodę", "twoje konto zostanie zablokowane", "pobierz załącznik",
+    "weryfikacja konta", "bank centralny", "przelej natychmiast", "tylko dzisiaj",
+    "zainstaluj aplikację", "doładuj konto", "darmowe krypto", "bitcoin giveaway",
+    "natychmiastowa akcja wymagana", "nieautoryzowana próba logowania",
+    "kliknij aby potwierdzić", "naciśnij tutaj", "konieczne potwierdzenie",
+    "pilna wiadomość", "oficjalne powiadomienie", "wyjątkowa oferta",
+    "nagroda gwarantowana", "weryfikacja płatności", "proszę nie ignorować"
+  ];
 
-    const expertPhrases = [
-      "twój bank", "ostatnie ostrzeżenie", "twój numer został wylosowany",
-      "nagroda gwarantowana", "weryfikacja płatności", "potrzebujemy twojego PINu",
-      "konto premium aktywowane", "konto zostało tymczasowo zablokowane",
-      "zbyt wiele prób logowania", "kliknij tutaj aby zachować bezpieczeństwo",
-      "proszę nie ignorować", "wymagane uaktualnienie danych",
-      "nie odpowiadaj na tę wiadomość", "zidentyfikowano problem z twoim kontem",
-      "wyjątkowa okazja", "dostęp ograniczony", "aktualizacja zabezpieczeń",
-      "podejrzana aktywność wykryta", "dokonaj płatności kryptowalutą",
-      "natychmiastowy przelew wymagany", "sprawdź załączony plik", "niepokojąca aktywność",
-      "weryfikacja tożsamości", "oficjalna wiadomość", "pilna wiadomość z działu IT",
-      "hasło wygasło", "kliknij aby zmienić hasło", "podaj dane logowania",
-      "weryfikacja logowania dwuskładnikowego"
-    ];
+  const expertPhrases = [
+    "twój bank", "ostatnie ostrzeżenie", "twój numer został wylosowany",
+    "konto premium aktywowane", "konto tymczasowo zablokowane",
+    "zbyt wiele prób logowania", "kliknij tutaj aby zachować bezpieczeństwo",
+    "wymagane uaktualnienie danych", "nie odpowiadaj na tę wiadomość",
+    "zidentyfikowano problem z twoim kontem", "dostęp ograniczony",
+    "aktualizacja zabezpieczeń", "podejrzana aktywność wykryta",
+    "dokonaj płatności kryptowalutą", "natychmiastowy przelew wymagany",
+    "sprawdź załączony plik", "niepokojąca aktywność",
+    "weryfikacja tożsamości", "oficjalna wiadomość", "pilna wiadomość z działu IT",
+    "hasło wygasło", "kliknij aby zmienić hasło", "podaj dane logowania",
+    "weryfikacja logowania dwuskładnikowego", "potrzebujemy twojego PINu",
+    "dane karty kredytowej", "zresetuj hasło natychmiast",
+    "fałszywa strona logowania", "link prowadzi do zewnętrznej strony",
+    "link wygasł", "podejrzany załącznik", "konto zostanie usunięte"
+  ];
 
-    function verifyMessage() {
-      const text = document.getElementById('messageInput').value.toLowerCase();
-      const expert = document.getElementById('expertMode').checked;
-      const result = document.getElementById('verificationResult');
-      let found = [];
+  // Funkcja oczyszcza tekst - usuwa znaki niealfanumeryczne i zamienia na małe litery
+  function normalizeText(text) {
+    return text.toLowerCase().replace(/[\W_]+/g, " ");
+  }
 
-      const phrases = expert ? basicPhrases.concat(expertPhrases) : basicPhrases;
+  // Funkcja weryfikująca wiadomość
+  function verifyMessage() {
+    const textRaw = document.getElementById('messageInput').value;
+    const expertMode = document.getElementById('expertMode').checked;
+    const result = document.getElementById('verificationResult');
 
-      phrases.forEach(phrase => {
-        if (text.includes(phrase)) {
-          found.push(phrase);
-        }
-      });
-
-      if (found.length > 0) {
-        result.innerHTML = `Wykryto podejrzane zwroty: <span class="danger">${found.join(', ')}</span>`;
-      } else {
-        result.textContent = 'Nie wykryto podejrzanych treści.';
-      }
+    if (!textRaw.trim()) {
+      result.textContent = "Wprowadź tekst wiadomości do analizy.";
+      result.className = "";
+      return;
     }
 
-    function scanUrl() {
-      const url = document.getElementById('urlInput').value.trim();
-      const result = document.getElementById('urlResult');
-      if (!url) {
-        result.textContent = 'Podaj adres URL lub IP.';
-        return;
+    const text = normalizeText(textRaw);
+    const phrases = expertMode ? basicPhrases.concat(expertPhrases) : basicPhrases;
+    const found = [];
+
+    phrases.forEach(phrase => {
+      // szukamy frazy normalizowanej (bez polskich znaków, bo są normalne)
+      const phraseNorm = normalizeText(phrase);
+      const re = new RegExp(`\\b${phraseNorm.replace(/ /g, "\\s+")}\\b`, "i");
+      if (re.test(text)) {
+        found.push(phrase);
       }
-      const scanLink = `https://urlscan.io/domain/${encodeURIComponent(url)}`;
-      result.innerHTML = `Kliknij aby zobaczyć wyniki skanowania: <a href="${scanLink}" target="_blank" style="color: var(--accent-color);">${scanLink}</a>`;
+    });
+
+    if (found.length > 0) {
+      result.innerHTML = `⚠️ Wykryto podejrzane zwroty: <span class="danger">${found.join(", ")}</span>`;
+      result.className = "danger";
+    } else {
+      result.textContent = "✔️ Nie wykryto podejrzanych treści.";
+      result.className = "safe";
     }
-  </script>
+  }
+
+  // Funkcja sprawdzająca, czy string jest IP (IPv4)
+  function isIPv4(str) {
+    const parts = str.trim().split(".");
+    if(parts.length !== 4) return false;
+    return parts.every(p => {
+      const n = Number(p);
+      return n >= 0 && n <= 255 && p === n.toString();
+    });
+  }
+
+  // Funkcja do skanowania URL lub IP (tworzy link do urlscan.io)
+  function scanUrl() {
+    const input = document.getElementById('urlInput').value.trim();
+    const result = document.getElementById('urlResult');
+
+    if (!input) {
+      result.textContent = "Wprowadź adres IP lub domenę do skanowania.";
+      result.className = "";
+      return;
+    }
+
+    // Prosta walidacja domeny (np. example.com)
+    const domainRegex = /^(?!:\/\/)([a-zA-Z0-9-_]+\.)+[a-zA-Z]{2,}$/;
+
+    let url;
+    if (isIPv4(input)) {
+      url = `https://urlscan.io/ip/${input}`;
+    } else if (domainRegex.test(input)) {
+      url = `https://urlscan.io/domain/${input}`;
+    } else {
+      result.textContent = "Nieprawidłowy format adresu IP lub domeny.";
+      result.className = "danger";
+      return;
+    }
+
+    // Tworzymy link klikalny
+    result.innerHTML = `🔗 <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+    result.className = "";
+  }
+
+  document.getElementById('verifyBtn').addEventListener('click', verifyMessage);
+  document.getElementById('scanBtn').addEventListener('click', scanUrl);
+</script>
 </body>
 </html>
